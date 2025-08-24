@@ -1,4 +1,4 @@
-# Networks-Lab
+# Networks-Lab Assignment1 (Windows)
 
 > **Developer Command Prompt for VS**
 
@@ -7,12 +7,15 @@
 ```cl /EHsc /std:c++17 server.cpp Ws2_32.lib```
 ```cl /EHsc /std:c++17 client.cpp Ws2_32.lib```
 
-Open VS Code and head over to the desired folder
-> Open 2 terminals
+> **VS Code**
 
+Open 2 terminals
+```cd C:\01_Arjeesh_Drive\CN```
+> 
 ```Server.exe 5000```
 ```client.exe 127.0.0.1 5000 msg.bits --scheme crc16 --inject no```
 
+> **Formats**
 `--scheme` options
 | Scheme     | Description                              |
 | ---------- | ---------------------------------------- |
