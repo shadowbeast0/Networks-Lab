@@ -16,6 +16,7 @@ Open 2 terminals
 ```client.exe 127.0.0.1 5000 msg.bits --scheme crc16 --inject no```
 
 > **Formats**
+
 `--scheme` options
 | Scheme     | Description                              |
 | ---------- | ---------------------------------------- |
