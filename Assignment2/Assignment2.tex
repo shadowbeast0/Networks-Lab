@@ -1,0 +1,609 @@
+%========================
+% Networks Lab Assignment 2 — Times-like font + grey code boxes + tight figures
+%========================
+\documentclass[12pt,a4paper]{article}
+
+%---- Page & font ----
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{newtxtext,newtxmath}   % Times-like text & math
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+\setstretch{1.15}
+\usepackage{microtype}
+
+%---- General utilities ----
+\usepackage{graphicx}
+\graphicspath{{./}{figs/}{images/}} % images next to .tex or in figs/ or images/
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{csquotes}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue!50!black,
+  citecolor=black
+}
+
+%---- Float control: keep figures in place + remove extra gaps
+\usepackage{float}      % for [H]
+\usepackage{needspace}  % avoid splitting near page breaks
+\makeatletter
+% Tight figure macro: zero float gaps and minimal caption spacing
+% (reduced default height from 0.80 to 0.68 \textheight)
+\newcommand{\TightFigure}[3][0.68\textheight]{%
+  \begingroup
+    \setlength{\intextsep}{0pt}%
+    \setlength{\textfloatsep}{0pt}%
+    \setlength{\abovecaptionskip}{2pt}%
+    \setlength{\belowcaptionskip}{0pt}%
+    \needspace{#1}%
+    \vspace{-0.4\baselineskip}% remove gap after heading
+    \begin{figure}[H]\centering
+      \includegraphics[width=\linewidth,height=#1,keepaspectratio]{#2}
+      \caption{#3}
+    \end{figure}%
+  \endgroup
+}
+\makeatother
+
+%---- Header ----
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\sffamily Arjeesh Palai\ \ 002310501086}
+\rhead{\sffamily \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%---- Code listings (grey background "box")
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{lstgray}{gray}{0.95}
+\lstdefinestyle{formal}{
+  backgroundcolor=\color{lstgray},
+  basicstyle=\ttfamily\small,
+  numbers=left,
+  numberstyle=\scriptsize,
+  numbersep=8pt,
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{black},
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2,
+  captionpos=b,
+  aboveskip=0.6\baselineskip,
+  belowskip=0.6\baselineskip
+}
+\lstdefinelanguage{bash}{
+  morekeywords={if,then,else,fi,for,do,done,while,function,case,esac,select},
+  sensitive=true
+}
+
+%---- In-bounds headings for code blocks
+\newcommand{\codeheading}[1]{%
+  \medskip
+  \noindent
+  \colorbox{lstgray}{\parbox{\dimexpr\linewidth-2\fboxsep}{\ttfamily\small #1}}%
+  \par\smallskip
+}
+
+%---- Metadata ----
+\newcommand{\univ}{Jadavpur University}
+\newcommand{\dept}{Department of Computer Science and Engineering}
+\newcommand{\coursename}{BCSE UG-III}
+\newcommand{\assignmenttitle}{Networks Lab Assignment 2}
+\newcommand{\studentname}{Arjeesh Palai}
+\newcommand{\rollno}{002310501086}
+\newcommand{\group}{A3}
+\newcommand{\submissiondate}{08 / 09 / 2025}
+
+%---- OPTIONAL real "F1 Turbo" font on cover (XeLaTeX/LuaLaTeX only)
+\usepackage{ifxetex,ifluatex}
+\newif\ifxetexorluatex
+\ifxetex\xetexorluatextrue\fi
+\ifluatex\xetexorluatextrue\fi
+\ifxetexorluatex
+  \usepackage{fontspec}
+  \newfontfamily\FOneTurbo{F1 Turbo}[BoldFont={F1 Turbo},ItalicFeatures={FakeSlant=0.2}]
+\else
+  \newcommand{\FOneTurbo}{\sffamily\bfseries\itshape}
+\fi
+
+%========================
+% Document
+%========================
+\begin{document}
+
+%---- Title Page (UNCHANGED as requested) ----
+\begin{titlepage}
+  \sffamily
+  \centering
+
+  % University (same F1 style; big)
+  {\FOneTurbo \fontsize{40}{44}\selectfont \univ\par}
+  \vspace{0.3em}
+  % Department (same F1 style; a bit smaller than university)
+  {\FOneTurbo \fontsize{30}{34}\selectfont \dept\par}
+
+  % Centered university logo (alignment unchanged)
+  \vspace{1.2cm}
+  \includegraphics[width=0.22\linewidth]{ju.png}
+
+  \vspace{2.2cm}
+  % Assignment title — larger and in F1 style
+  {\FOneTurbo \fontsize{40}{44}\selectfont \MakeUppercase{\assignmenttitle}\par}
+
+  \vspace{0.9cm}
+  % Course name — still F1 style
+  {\FOneTurbo \fontsize{24}{28}\selectfont \coursename\par}
+
+  \vspace{2.2cm}
+  \raggedright
+  \noindent\begin{tabular}{@{}p{4cm}l}
+    \textbf{Student}  : & \studentname \\
+    \textbf{Roll No.} : & \rollno \\
+    \textbf{Group}    : & \group \\
+    \textbf{Date}     : & \submissiondate \\
+  \end{tabular}
+
+  \vfill
+  \noindent\rule{\linewidth}{0.8pt}
+\end{titlepage}
+
+\setcounter{page}{1}
+
+%========================
+% Report body
+%========================
+
+\section*{Problem Statement}
+Implement LLC flow control mechanisms over a simulated, potentially lossy and delayed channel. Compare Stop \& Wait, Go-Back-N (GBN), and Selective Repeat (SR) ARQ in terms of throughput, retransmissions, RTT/RTO behavior, and correctness.
+
+\section{Design}
+\textbf{Purpose.} Simulate Data Link layer reliability using ARQ over an unreliable channel. Frames carry addresses, length, sequence number, payload, and CRC32 FCS. ACK/NAK frames are also protected by CRC.
+
+\noindent\textbf{Structure diagram.}\vspace{-0.9\baselineskip}
+\TightFigure{structure_diagram.png}{System structure overview}
+
+\subsection*{Input/Output}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{Input data}: \texttt{data.txt} generated by helper program (each line as payload; padded to minimum 46 bytes).
+\item \textbf{CLI parameters} (examples):
+\begin{itemize}
+\item Stop\&Wait sender: \texttt{p\_err} (bit error probability), \texttt{max\_delay} (ms)
+\item Go-Back-N sender: \texttt{N} (sender window), \texttt{p\_err}, \texttt{max\_delay}
+\item Selective Repeat sender: \texttt{N}, \texttt{p\_err}, \texttt{max\_delay}
+\end{itemize}
+\item \textbf{Sockets}: TCP loopback port \texttt{8000}.
+\item \textbf{Output}: Console logs (sent/ACK/NAK/timeout), computed RTT/RTO, and successful delivery.
+\end{itemize}
+
+\section{Implementation (Key Snippets Only)}
+
+\subsection{Common utilities (\texttt{llc\_common.h})}
+\codeheading{Channel (delay, loss, bit flips)}
+\begin{lstlisting}[style=formal,language=C++]
+static constexpr size_t MIN_PAYLOAD = 46;
+
+struct Channel {
+    double bit_error_prob = 0.0;
+    int    max_delay_ms   = 0;
+    double loss_prob      = 0.0;
+    std::mt19937 rng{ std::random_device{}() };
+    std::uniform_real_distribution<double> U{0.0, 1.0};
+
+    void apply_delay() {
+        if (max_delay_ms <= 0) return;
+        int d = int(U(rng) * (max_delay_ms + 1));
+        Sleep(static_cast<DWORD>(d));
+    }
+    bool maybe_drop() { return U(rng) < loss_prob; }
+
+    void flip_bits(std::vector<uint8_t>& buf) {
+        if (bit_error_prob <= 0.0) return;
+        std::bernoulli_distribution B(bit_error_prob);
+        for (auto& b : buf) {
+            uint8_t m = 0;
+            for (int i = 0; i < 8; ++i) if (B(rng)) m ^= (1u << i);
+            b ^= m;
+        }
+    }
+};
+\end{lstlisting}
+
+\codeheading{Frame (serialize/parse + CRC32)}
+\begin{lstlisting}[style=formal,language=C++]
+struct Frame {
+    uint8_t src[6]{}, dst[6]{};
+    uint16_t length{0};
+    uint8_t seq{0};
+    std::vector<uint8_t> payload;
+    uint32_t fcs{0};
+
+    std::vector<uint8_t> serialize_with_crc() {
+        std::vector<uint8_t> body;
+        body.insert(body.end(), src, src + 6);
+        body.insert(body.end(), dst, dst + 6);
+        uint16_t be_len = htons(length);
+        body.push_back(uint8_t(be_len >> 8));
+        body.push_back(uint8_t(be_len & 0xFF));
+        body.push_back(seq);
+        body.insert(body.end(), payload.begin(), payload.end());
+        if (body.size() < (15 + MIN_PAYLOAD))
+            body.insert(body.end(), (15 + MIN_PAYLOAD) - body.size(), uint8_t(' '));
+        uint32_t c = crc32(body.data(), body.size());
+        fcs = c;
+        body.push_back(uint8_t((c >> 24) & 0xFF));
+        body.push_back(uint8_t((c >> 16) & 0xFF));
+        body.push_back(uint8_t((c >> 8) & 0xFF));
+        body.push_back(uint8_t(c & 0xFF));
+        return body;
+    }
+
+    static bool parse(const std::vector<uint8_t>& buf, Frame& out) {
+        if (buf.size() < 15 + MIN_PAYLOAD + 4) return false;
+        std::copy(buf.begin(), buf.begin() + 6, out.src);
+        std::copy(buf.begin() + 6, buf.begin() + 12, out.dst);
+        uint16_t be_len = (uint16_t(buf[12]) << 8) | uint16_t(buf[13]);
+        out.length = ntohs(be_len);
+        out.seq = buf[14];
+        size_t pay = std::max<size_t>(MIN_PAYLOAD, out.length);
+        if (buf.size() < 15 + pay + 4) return false;
+        out.payload.assign(buf.begin() + 15, buf.begin() + 15 + pay);
+        out.fcs = (uint32_t(buf[15+pay]) << 24) | (uint32_t(buf[16+pay]) << 16)
+                | (uint32_t(buf[17+pay]) << 8) | uint32_t(buf[18+pay]);
+        return true;
+    }
+
+    static bool verify_crc(const std::vector<uint8_t>& buf) {
+        if (buf.size() < 4) return false;
+        uint32_t got = (uint32_t(buf[buf.size()-4]) << 24) |
+                       (uint32_t(buf[buf.size()-3]) << 16) |
+                       (uint32_t(buf[buf.size()-2]) << 8)  |
+                        uint32_t(buf[buf.size()-1]);
+        uint32_t calc = crc32(buf.data(), buf.size() - 4);
+        return got == calc;
+    }
+};
+\end{lstlisting}
+
+\codeheading{ACK/NAK with CRC}
+\begin{lstlisting}[style=formal,language=C++]
+enum : uint8_t { ACK = 0x06, NAK = 0x15 };
+
+struct Ack {
+    uint8_t type{ACK};
+    uint8_t seq{0};
+    uint32_t fcs{0};
+
+    std::vector<uint8_t> serialize() {
+        std::vector<uint8_t> b{type, seq};
+        uint32_t c = crc32(b.data(), b.size());
+        fcs = c;
+        b.push_back(uint8_t((c >> 24) & 0xFF));
+        b.push_back(uint8_t((c >> 16) & 0xFF));
+        b.push_back(uint8_t((c >> 8) & 0xFF));
+        b.push_back(uint8_t(c & 0xFF));
+        return b;
+    }
+
+    static bool parse(const uint8_t* buf, size_t len, Ack& out) {
+        if (len < 6) return false;
+        out.type = buf[0];
+        out.seq  = buf[1];
+        uint32_t got = (uint32_t(buf[2]) << 24) | (uint32_t(buf[3]) << 16)
+                     | (uint32_t(buf[4]) << 8)  |  uint32_t(buf[5]);
+        std::vector<uint8_t> b{out.type, out.seq};
+        uint32_t calc = crc32(b.data(), b.size());
+        if (got != calc) return false;
+        out.fcs = got; return true;
+    }
+};
+\end{lstlisting}
+
+\codeheading{RTO Estimator (Jacobson/Karels)}
+\begin{lstlisting}[style=formal,language=C++]
+struct RttEstimator {
+    bool have=false; double srtt=0.0, rttvar=0.0; double rto_ms=1000.0;
+    void observe(double sample_ms) {
+        if (!have) { srtt=sample_ms; rttvar=sample_ms/2.0; have=true; }
+        else {
+            const double alpha=1.0/8.0, beta=1.0/4.0;
+            rttvar = (1.0 - beta)*rttvar + beta*std::abs(srtt - sample_ms);
+            srtt   = (1.0 - alpha)*srtt   + alpha*sample_ms;
+        }
+        rto_ms = clampd(srtt + 4.0*rttvar, 200.0, 4000.0);
+    }
+};
+\end{lstlisting}
+
+\subsection{Stop \& Wait (core loops)}
+\codeheading{Sender: send $\to$ wait-ACK with adaptive RTO}
+\begin{lstlisting}[style=formal,language=C++]
+auto wire = f.serialize_with_crc();
+bool acked = false;
+while (!acked) {
+    chan.apply_delay();
+    auto tx = wire;
+    chan.flip_bits(tx);
+    if (!chan.maybe_drop()) send_all(conn, tx.data(), tx.size());
+    std::cout << "[SENDER] Sent frame seq=" << int(seq) << "\n";
+
+    auto t0 = std::chrono::steady_clock::now();
+    uint8_t ackbuf[6];
+    if (recv_exact(conn, ackbuf, sizeof(ackbuf), int(rtt.rto_ms))) {
+        Ack a{};
+        if (Ack::parse(ackbuf, sizeof(ackbuf), a) && a.type==ACK && a.seq==seq) {
+            auto t1 = std::chrono::steady_clock::now();
+            double ms = std::chrono::duration<double,std::milli>(t1 - t0).count();
+            rtt.observe(ms);
+            std::cout << "[SENDER] ACK " << int(a.seq)
+                      << " (RTT=" << ms << "ms, RTO=" << rtt.rto_ms << "ms)\n";
+            acked = true; seq = uint8_t(seq + 1);
+        } else {
+            std::cout << "[SENDER] Bad ACK/NAK; retransmitting\n";
+        }
+    } else {
+        std::cout << "[SENDER] Timeout; retransmitting seq=" << int(seq)
+                  << " (RTO=" << rtt.rto_ms << "ms)\n";
+    }
+}
+\end{lstlisting}
+
+\codeheading{Receiver: CRC+SEQ check; ACK only if in-order}
+\begin{lstlisting}[style=formal,language=C++]
+bool ok_crc = Frame::verify_crc(buf);
+Frame f{}; bool parsed = Frame::parse(buf, f);
+if (!parsed) { /* drop */ }
+std::cout << "[RECV] Frame seq=" << int(f.seq)
+          << " CRC=" << (ok_crc ? "OK" : "BAD") << "\n";
+
+if (ok_crc && f.seq == expected) {
+    expected = uint8_t(expected + 1);
+    Ack a{ACK, f.seq};
+    auto wire = a.serialize();
+    chan.apply_delay(); chan.flip_bits(wire);
+    if (!chan.maybe_drop()) send_all(s, wire.data(), wire.size());
+    std::cout << "[RECV] ACK sent for " << int(f.seq) << "\n";
+} else {
+    std::cout << "[RECV] Discarded (crc/seq mismatch). No ACK.\n";
+}
+\end{lstlisting}
+
+\subsection{Go-Back-N (key logic)}
+\codeheading{Sender: pipeline, cumulative ACKs, timeout $\Rightarrow$ resend window}
+\begin{lstlisting}[style=formal,language=C++]
+uint8_t base=0, nextseq=0; int N=4;
+std::map<uint8_t,std::vector<uint8_t>> frame_cache;
+
+auto in_window = [&](uint8_t s){
+  int diff = int(uint8_t(s - base));
+  return 0 <= diff && diff < N;
+};
+
+auto send_frame = [&](uint8_t seq, const std::vector<uint8_t>& payload){
+  Frame f; /* fill header + payload, set f.seq=seq */
+  auto w_clean = f.serialize_with_crc();
+  frame_cache[seq] = w_clean;
+  auto w = w_clean; chan.apply_delay(); chan.flip_bits(w);
+  if (!chan.maybe_drop()) send_all(conn, w.data(), w.size());
+  std::cout << "[GBN SENDER] Sent seq=" << int(seq) << "\n";
+};
+
+while (base != nextseq || more_data()) {
+  while (in_window(nextseq) && more_data())
+      { send_frame(nextseq, next_payload()); nextseq = uint8_t(nextseq + 1); }
+
+  uint8_t ackbuf[6];
+  if (recv_exact(conn, ackbuf, sizeof(ackbuf), int(rtt.rto_ms))) {
+      Ack a{}; if (Ack::parse(ackbuf, sizeof(ackbuf), a) && a.type==ACK) {
+          if (int(uint8_t(a.seq - base)) > 0) {
+              base = a.seq; prune_cache_before(base);
+          }
+      }
+  } else {
+      std::cout << "[GBN SENDER] TIMEOUT, resending ["<<int(base)<<","<<int(nextseq)<<")\n";
+      for (uint8_t s = base; s != nextseq; s = uint8_t(s + 1)) {
+          auto it = frame_cache.find(s);
+          if (it != frame_cache.end()) {
+              auto w2 = it->second; chan.apply_delay(); chan.flip_bits(w2);
+              if (!chan.maybe_drop()) send_all(conn, w2.data(), w2.size());
+          }
+      }
+  }
+}
+\end{lstlisting}
+
+\codeheading{Receiver: expected seq, CRC check, send cumulative ACK}
+\begin{lstlisting}[style=formal,language=C++]
+uint8_t expected = 0;
+bool ok = Frame::verify_crc(buf);
+Frame f{}; Frame::parse(buf, f);
+if (ok && f.seq == expected) expected = uint8_t(expected + 1);
+Ack a{ACK, expected};             % cumulative ACK for next expected
+auto w = a.serialize();
+chan.apply_delay(); chan.flip_bits(w);
+if (!chan.maybe_drop()) send_all(s, w.data(), w.size());
+\end{lstlisting}
+
+\subsection{Selective Repeat (key logic)}
+\codeheading{Sender: per-slot timers, selective retransmit on NAK/timeout}
+\begin{lstlisting}[style=formal,language=C++]
+struct Slot {
+  bool in_use=false, acked=false;
+  std::vector<uint8_t> wire;
+  std::chrono::steady_clock::time_point deadline;
+};
+uint8_t base=0, nextseq=0; int N=6;
+std::map<uint8_t,Slot> window;
+
+auto in_window = [&](uint8_t s){ return int(uint8_t(s - base)) >= 0
+                                      && int(uint8_t(s - base)) < N; };
+
+auto send_or_resend = [&](uint8_t seq){
+  auto &slot = window[seq]; auto w = slot.wire;
+  chan.apply_delay(); chan.flip_bits(w);
+  if (!chan.maybe_drop()) send_all(conn, w.data(), w.size());
+  slot.deadline = std::chrono::steady_clock::now()
+                + std::chrono::milliseconds(int(rtt.rto_ms));
+};
+
+while (!done()) {
+  % push new frames
+  while (in_window(nextseq) && more_data()) {
+    Frame f; /* fill header+payload; f.seq=nextseq */
+    window[f.seq] = Slot{true,false,f.serialize_with_crc(),{}};
+    send_or_resend(f.seq);
+    nextseq = uint8_t(nextseq + 1);
+  }
+
+  % handle ACK/NAK
+  if (recv_ack_or_nak(a)) {
+    if (a.type==ACK && window.count(a.seq)) {
+      window[a.seq].acked = true;
+      while (window.count(base) && window[base].acked) { window.erase(base); base=uint8_t(base+1); }
+    } else if (a.type==NAK && window.count(a.seq)) send_or_resend(a.seq);
+  }
+
+  % handle timeouts
+  for (auto &kv : window)
+    if (!kv.second.acked && now() >= kv.second.deadline) send_or_resend(kv.first);
+}
+\end{lstlisting}
+
+\codeheading{Receiver: buffer out-of-order, ACK each valid, NAK on CRC error}
+\begin{lstlisting}[style=formal,language=C++]
+uint8_t base=0; int N=6; std::map<uint8_t,Frame> buffer;
+
+bool ok = Frame::verify_crc(buf);
+Frame f{}; if (!Frame::parse(buf, f)) return;
+
+if (!ok) {
+  Ack n{NAK, base}; auto w = n.serialize();
+  chan.apply_delay(); chan.flip_bits(w);
+  if (!chan.maybe_drop()) send_all(s, w.data(), w.size());
+} else {
+  int diff = int(uint8_t(f.seq - base));
+  if (diff < 0) {                      // valid duplicate
+    Ack a{ACK, f.seq}; auto w=a.serialize();
+    chan.apply_delay(); chan.flip_bits(w);
+    if (!chan.maybe_drop()) send_all(s, w.data(), w.size());
+  } else if (diff < N) {               // in-window
+    buffer[f.seq] = f;
+    Ack a{ACK, f.seq}; auto w=a.serialize();
+    chan.apply_delay(); chan.flip_bits(w);
+    if (!chan.maybe_drop()) send_all(s, w.data(), w.size());
+    while (buffer.count(base)) { buffer.erase(base); base = uint8_t(base + 1); }
+  }
+}
+\end{lstlisting}
+
+\subsection{Data generator (payload maker)}
+\codeheading{\texttt{make\_data.cpp}: generate \texttt{data.txt}}
+\begin{lstlisting}[style=formal,language=C++]
+int main() {
+  std::mt19937 rng(12345);
+  std::uniform_int_distribution<int> lenDist(10,120), byteDist(0,255);
+  std::ofstream out("data.txt", std::ios::binary);
+  for (int i=1;i<=10;++i) {
+    int L = lenDist(rng);
+    std::vector<unsigned char> buf; buf.reserve(L);
+    for (int j=0;j<L;++j) {
+      unsigned char b; do { b=byteDist(rng); } while (b==0x0A || b==0x0D);
+      buf.push_back(b);
+    }
+    out.write(reinterpret_cast<const char*>(buf.data()), buf.size());
+    out.put('\n');
+  }
+  return 0;
+}
+\end{lstlisting}
+
+\section{Test Cases (Commands Used)}
+\paragraph{Stop-and-Wait}
+\begin{lstlisting}[style=formal,language=bash]
+# TC1 — Baseline (no error/loss)
+Terminal A: stopwait_sender.exe 0 0
+Terminal B: stopwait_receiver.exe 0 0
+
+# TC2 — Delay only
+Terminal A: stopwait_sender.exe 0 120
+Terminal B: stopwait_receiver.exe 0 120
+
+# TC3 — Mixed (moderate errors + delay)
+Terminal A: stopwait_sender.exe 0.0005 100
+Terminal B: stopwait_receiver.exe 0.0005 100
+\end{lstlisting}
+
+\paragraph{Go-Back-N}
+\begin{lstlisting}[style=formal,language=bash]
+# TC1 — Baseline, N=4
+Terminal A: gobackn_sender.exe 4 0 0
+Terminal B: gobackn_receiver.exe 0 0
+
+# TC2 — Delay only, N=4
+Terminal A: gobackn_sender.exe 4 0 150
+Terminal B: gobackn_receiver.exe 0 150
+
+# TC3 — Mixed, N=8
+Terminal A: gobackn_sender.exe 8 0.0005 100
+Terminal B: gobackn_receiver.exe 0.0005 100
+\end{lstlisting}
+
+\paragraph{Selective Repeat}
+\begin{lstlisting}[style=formal,language=bash]
+# TC1 — Baseline, N=4
+Terminal A: sr_sender.exe 4 0 0
+Terminal B: sr_receiver.exe 4 0 0
+
+# TC2 — Delay only, N=5
+Terminal A: sr_sender.exe 5 0 120
+Terminal B: sr_receiver.exe 5 0 120
+
+# TC3 — Mixed, N=6
+Terminal A: sr_sender.exe 6 0.0005 100
+Terminal B: sr_receiver.exe 6 0.0005 100
+\end{lstlisting}
+
+\section{Results (Observed Behaviour)}
+\subsection*{Stop-and-Wait}
+\textbf{TC1 (0,0):} Receiver logs only \texttt{CRC=OK}. Sender prints \texttt{ACK <seq>} for each frame; \emph{no timeouts}.\\
+\textbf{TC2 (0,120):} Receiver \texttt{CRC=OK}. Sender shows occasional \texttt{Timeout; retransmitting seq=<n>}, then progresses once ACK arrives (idle waiting visible).\\
+\textbf{TC3 (0.0005,100):} Receiver mixes \texttt{CRC=OK}/\texttt{CRC=BAD}. Sender retries same \texttt{seq} until ACKed; steady but slower progress.
+
+\subsection*{Go-Back-N}
+\textbf{TC1 (N=4, 0,0):} Receiver starts \texttt{seq=0 CRC=OK expected=0}, responds with \texttt{cumulative ACK=1}, etc. No \texttt{CRC=BAD}, no timeouts.\\
+\textbf{TC2 (N=4, 0,150):} Sender prints periodic \texttt{TIMEOUT, resending [b,e)}. Receiver mostly \texttt{CRC=OK}; out-of-order or corrupted frames discarded; cumulative ACK held until the gap closes.\\
+\textbf{TC3 (N=8, 0.0005,100):} Receiver intermittently \texttt{CRC=BAD}, discards out-of-order until missing seq is received, then \texttt{Sent cumulative ACK=<k>}. Sender times out and resends current window; progress in bursts.\\
+\emph{Typical receiver log:}\\
+\texttt{[GBN RECV] seq=5 CRC=BAD expected=5 -> discard}\\
+\texttt{[GBN RECV] seq=7 CRC=OK expected=5 -> discard}\\
+\texttt{[GBN RECV] seq=5 CRC=OK expected=5}\\
+\texttt{[GBN RECV] Sent cumulative ACK=6}
+
+\subsection*{Selective Repeat}
+\textbf{TC1 (N=4, 0,0):} Receiver ACKs each frame; no NAKs/timeouts.\\
+\textbf{TC2 (N=5, 0,120):} Sender shows \texttt{Timeout seq=<n> -> retransmit}. Receiver accepts in-window out-of-order, advances \texttt{base} as gaps fill.\\
+\textbf{TC3 (N=6, 0.0005,100):} Receiver: \texttt{CRC=BAD} $\Rightarrow$ \texttt{NAK <base>}; buffers valid out-of-order; re-ACKs valid duplicates (\texttt{seq < base}); \texttt{base} increments when gap fills. Sender performs targeted retransmissions; progress resumes after each NAK/timeout.\\
+\emph{Typical receiver log:}\\
+\texttt{[SR RECV] seq=1 CRC=BAD base=1 -> NAK 1}\\
+\texttt{[SR RECV] seq=2 CRC=OK base=1 -> ACK 2}\\
+\texttt{[SR RECV] seq=1 CRC=OK base=1 -> ACK 1}
+
+\section{Discussion}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{S\&W}: Deterministic progress in TC1; TC2 shows idle time dominated by propagation/queuing delay; TC3 shows reliability via repeat-until-ACK with reduced throughput.
+\item \textbf{GBN}: TC1 confirms pipeline gains without penalties. TC2 highlights bursty window timeouts due to delayed ACK arrivals; TC3 shows classic burst retransmissions and cumulative ACK jumps once the missing seq arrives.
+\item \textbf{SR}: TC1 clean; TC2 demonstrates selective timeout handling per-slot; TC3 validates fine-grained recovery (NAKs + individual ACKs), highest efficiency under errors at the cost of buffering/state.
+\item \textbf{Across schemes}: Increasing delay magnifies RTO sensitivity; errors penalize GBN most (window-wide retransmits) and SR least (targeted retries).
+\end{itemize}
+
+\section{Diagrams}
+\subsection*{Flow-control diagrams}
+\TightFigure[0.62\textheight]{flow_stopwait.png}{Stop \& Wait}
+\TightFigure[0.62\textheight]{flow_gobackn.jpg}{Go-Back-N ARQ}
+\TightFigure[0.62\textheight]{flow_sr.jpg}{Selective Repeat ARQ}
+
+\end{document}
