@@ -1,0 +1,251 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{newtxtext,newtxmath}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+\setstretch{1.15}
+\usepackage{microtype}
+
+\usepackage{graphicx}
+\graphicspath{{./}{figs/}{images/}}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{csquotes}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue!50!black,
+  citecolor=black
+}
+\usepackage{caption}
+
+\usepackage{float}
+\usepackage{needspace}
+\makeatletter
+\newcommand{\TightFigure}[3][0.68\textheight]{%
+  \begingroup
+    \setlength{\intextsep}{0pt}%
+    \setlength{\textfloatsep}{0pt}%
+    \setlength{\abovecaptionskip}{2pt}%
+    \setlength{\belowcaptionskip}{0pt}%
+    \needspace{#1}%
+    \vspace{-0.4\baselineskip}%
+    \begin{figure}[H]\centering
+      \includegraphics[width=\linewidth,height=#1,keepaspectratio]{#2}
+      \caption{#3}
+    \end{figure}%
+  \endgroup
+}
+\makeatother
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\sffamily Arjeesh Palai\ \ 002310501086}
+\rhead{\sffamily \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{lstgray}{gray}{0.95}
+\lstdefinestyle{formalBig}{
+  backgroundcolor=\color{lstgray},
+  basicstyle=\ttfamily\normalsize,
+  numbers=left,
+  numberstyle=\footnotesize,
+  numbersep=16pt,
+  frame=single,
+  framerule=0.6pt,
+  rulecolor=\color{black},
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2,
+  captionpos=b,
+  aboveskip=0.7\baselineskip,
+  belowskip=0.7\baselineskip,
+  xleftmargin=1em,
+  framexleftmargin=1em
+}
+\lstdefinelanguage{bash}{
+  morekeywords={if,then,else,fi,for,do,done,while,function,case,esac,select},
+  sensitive=true
+}
+
+\newcommand{\codeheading}[1]{%
+  \medskip
+  \noindent
+  \colorbox{lstgray}{\parbox{\dimexpr\linewidth-2\fboxsep}{\ttfamily\small #1}}%
+  \par\smallskip
+}
+
+\newcommand{\univ}{Jadavpur University}
+\newcommand{\dept}{Department of Computer Science and Engineering}
+\newcommand{\coursename}{BCSE UG-III}
+\newcommand{\assignmenttitle}{Networks Lab Assignment 5}
+\newcommand{\studentname}{Arjeesh Palai}
+\newcommand{\rollno}{002310501086}
+\newcommand{\group}{A3}
+\newcommand{\submissiondate}{10 / 11 / 2025}
+
+\usepackage{ifxetex,ifluatex}
+\newif\ifxetexorluatex
+\ifxetex\xetexorluatextrue\fi
+\ifluatex\xetexorluatextrue\fi
+\ifxetexorluatex
+  \usepackage{fontspec}
+  \newfontfamily\FOneTurbo{F1 Turbo}[BoldFont={F1 Turbo},ItalicFeatures={FakeSlant=0.2}]
+\else
+  \newcommand{\FOneTurbo}{\sffamily\bfseries\itshape}
+\fi
+
+\begin{document}
+
+%========================
+% Title Page (logo ONLY here, title clearly below logo)
+%========================
+\begin{titlepage}
+  \thispagestyle{empty} % no header/footer on title page
+  \sffamily
+
+  \begin{center}
+    {\FOneTurbo \fontsize{40}{44}\selectfont \univ\par}
+    \vspace{0.3em}
+    {\FOneTurbo \fontsize{30}{34}\selectfont \dept\par}
+
+    \vspace{1.4cm}
+    % Logo centered on its own line
+    \includegraphics[width=0.24\linewidth]{ju.png}\par
+
+    \vspace{2.0cm}
+    % Assignment title clearly BELOW the logo
+    {\FOneTurbo \fontsize{40}{44}\selectfont \MakeUppercase{\assignmenttitle}\par}
+
+    \vspace{0.9cm}
+    {\FOneTurbo \fontsize{24}{28}\selectfont \coursename\par}
+  \end{center}
+
+  \vspace{1.8cm}
+  \raggedright
+  \noindent\begin{tabular}{@{}p{4cm}l}
+    \textbf{Student}  : & \studentname \\
+    \textbf{Roll No.} : & \rollno \\
+    \textbf{Group}    : & \group \\
+    \textbf{Date}     : & \submissiondate \\
+  \end{tabular}
+
+  \vfill
+  \noindent\rule{\linewidth}{0.8pt}
+\end{titlepage}
+
+\setcounter{page}{1}
+
+\section*{Assignment 5}
+\textbf{Task:} Packet Tracer \& traffic analysis with Wireshark: capture traffic, inspect protocol stacks (Ethernet/IP/TCP/UDP/ICMP/HTTP), use filters, follow streams, view raw bytes, compute latencies, identify NIC OUIs, and generate protocol/flow statistics.\\[0.25em]
+\textbf{Deliverables:} Screenshots and explanations for ICMP/ARP (or ICMPv6 ND), HTTP request/response timing, IP addresses, Host header hex, followed flows, server packet (TCP Src=80) with Ethernet details, NIC manufacturers \& OUIs, protocol percentages, and a Flow Graph.
+
+\section*{Answers}
+
+\subsection*{Q1. ICMP and initial address resolution (ARP / ICMPv6 ND)}
+\TightFigure[0.38\textheight]{arp.png}{IPv4 ARP request/reply before ICMP echo.}
+\TightFigure[0.38\textheight]{icmpv6.png}{IPv6 Neighbor Solicitation/Advertisement before ICMPv6 echo.}
+\textbf{Answer:} Started a fresh capture and ran \texttt{ping}. L2 resolution precedes ICMP: ARP (IPv4) or ICMPv6 ND (IPv6). After resolution, Echo Request/Reply pairs appear for the ping exchange.
+
+\subsection*{Q2. Web traffic inspection (protocols, RTT, addresses, Host)}
+% --- Bigger protocol glimpses: two per row (0.49\linewidth), then last one wide ---
+\begingroup
+\setlength{\abovecaptionskip}{2pt}\setlength{\belowcaptionskip}{0pt}
+\begin{figure}[H]\centering
+  \includegraphics[width=.49\linewidth]{diff_protocol_1.png}\hfill
+  \includegraphics[width=.49\linewidth]{diff_protocol_2.png}
+  \caption{Unfiltered protocol glimpses (1/3).}
+\end{figure}
+\begin{figure}[H]\centering
+  \includegraphics[width=.49\linewidth]{diff_protocol_3.png}\hfill
+  \includegraphics[width=.49\linewidth]{diff_protocol_4.png}
+  \caption{Unfiltered protocol glimpses (2/3).}
+\end{figure}
+\begin{figure}[H]\centering
+  \includegraphics[width=.82\linewidth]{diff_protocol_5.png}
+  \caption{Unfiltered protocol glimpses (3/3).}
+\end{figure}
+
+% --- Bigger HTTP latency images: show each almost full width ---
+\begin{figure}[H]\centering
+  \includegraphics[width=.9\linewidth]{http_get_ok.png}
+  \caption{HTTP GET packet used for latency measurement.}
+\end{figure}
+\begin{figure}[H]\centering
+  \includegraphics[width=.9\linewidth]{http_get_ok_diff_time_format.png}
+  \caption{Matching HTTP 200 OK reply with timestamp.}
+\end{figure}
+
+% --- Bigger IP/Host inspection: one per row ---
+\begin{figure}[H]\centering
+  \includegraphics[width=.9\linewidth]{src_dst.png}
+  \caption{Source/Destination IPs from the GET packet.}
+\end{figure}
+\begin{figure}[H]\centering
+  \includegraphics[width=.9\linewidth]{host_packet.png}
+  \caption{Packet Bytes and HTTP header showing \texttt{Host:}.}
+\end{figure}
+\endgroup
+
+\textbf{(a) Protocols:} TCP, UDP, HTTP, ARP, DNS, TLS~1.2/1.3, QUIC, SSDP, ICMPv6.\\
+\textbf{(b) HTTP latency:} GET at \(t=74.031239\) s; 200 OK at \(t=74.331279\) s \(\Rightarrow \Delta t=\mathbf{0.30004}\) s.\\
+\textbf{(c) IPs:} Source (host) \texttt{2405:201:8021:20a5:b44b:919b:a241:e0ee}; Destination (site) \texttt{2600:1408:ec00:36::1736:7f31}.\\
+\textbf{(d/e) Host:} \texttt{Host: example.com} in the HTTP layer.
+
+\subsection*{Q3. Hex and ASCII in Packet Bytes}
+\TightFigure[0.42\textheight]{host_packet.png}{Packet Bytes pane showing aligned Hex and ASCII.}
+\textbf{Answer:} The lower pane displays offset, hex bytes, and ASCII; the \texttt{Host: example.com} substring is visible with matching hex.
+
+\subsection*{Q4. First 4 bytes of Hex for the \texttt{Host} value}
+\TightFigure[0.42\textheight]{host_packet.png}{Locating the start of \texttt{example.com} for hex extraction.}
+\textbf{Answer:} The first four bytes of the value (\emph{exam}) are \(\mathbf{65\ 78\ 61\ 6d}\).
+
+\subsection*{Q5. Follow a conversation (flow)}
+\begingroup
+\setlength{\abovecaptionskip}{2pt}\setlength{\belowcaptionskip}{0pt}
+\begin{figure}[H]\centering
+  \includegraphics[width=.9\linewidth]{follow_tcp_stream.png}
+  \caption{Follow \(\rightarrow\) TCP Stream: reassembled request.}
+\end{figure}
+\begin{figure}[H]\centering
+  \includegraphics[width=.9\linewidth]{follow_tcp_stream_2.png}
+  \caption{Follow \(\rightarrow\) TCP Stream: reassembled response.}
+\end{figure}
+\endgroup
+\textbf{Answer:} Using Follow TCP Stream reconstructs the HTTP GET and the subsequent 200 OK with payload.
+
+\subsection*{Q6. HTTP packet from server (TCP Source Port = 80)}
+\TightFigure[0.48\textheight]{tcp_src_port_80.png}{Server \(\rightarrow\) client segment with TCP Src=80 and Ethernet expanded.}
+\textbf{Answer:} A server-to-client HTTP packet shows \texttt{TCP} Source Port \(=80\); expanding Ethernet reveals MAC addressing.
+
+\subsection*{Q7. NIC manufacturers (vendor resolution)}
+\TightFigure[0.48\textheight]{diff_protocol_3.png}{Ethernet II details with vendor names (name resolution enabled).}
+\textbf{Answer:} Vendor mapping indicates the host NIC as \textbf{Intel} and the server NIC as \textbf{ServercomPri} (example frames shown).
+
+\subsection*{Q8. Hex OUIs (first three bytes of each MAC)}
+\TightFigure[0.42\textheight]{hex_oui.png}{Reading OUIs (first 3 bytes) from MAC addresses.}
+\textbf{Answer:} OUIs observed: Intel \(\mathbf{78:2b:46}\); ServercomPri \(\mathbf{b4:a7:c6}\).
+
+\subsection*{Q9. Protocol percentages (TCP vs UDP)}
+\TightFigure[0.48\textheight]{protocol_hierarchy.png}{Protocol Hierarchy (\emph{capture must be unfiltered}).}
+\textbf{Answer:} Clear display filters \(\rightarrow\) \textbf{Statistics} \(\rightarrow\) \textbf{Protocol Hierarchy} to obtain accurate TCP/UDP percentages for the entire capture.
+
+\subsection*{Q10. Flow Graph}
+\TightFigure[0.48\textheight]{flow.png}{Statistics \(\rightarrow\) Flow Graph summarizing per-flow timelines.}
+\textbf{Answer:} The graph shows SYN/SYN-ACK/ACK transitions and request/response ordering across concurrent connections.
+
+\section*{Appendix: Capture Steps}
+\begin{itemize}[leftmargin=2em,itemsep=0.2em]
+  \item Selected the correct NIC and started capture.
+  \item Enabled MAC name resolution for vendor IDs.
+  \item Generated traffic: \texttt{ping}, web browsing (HTTP/HTTPS), DNS lookups.
+  \item Used filters (\texttt{http}, \texttt{tcp}, \texttt{dns}), Follow Streams, Protocol Hierarchy, and Flow Graph.
+\end{itemize}
+
+\end{document}
