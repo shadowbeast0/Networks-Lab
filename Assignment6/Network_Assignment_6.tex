@@ -1,0 +1,241 @@
+% Source assignment brief for context: :contentReference[oaicite:0]{index=0}
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{newtxtext,newtxmath}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+\setstretch{1.15}
+\usepackage{microtype}
+
+\usepackage{graphicx}
+\graphicspath{{./}{figs/}{images/}}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{csquotes}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue!50!black,
+  citecolor=black
+}
+\usepackage{caption}
+
+% Tight figures / minimal whitespace
+\usepackage{float}
+\usepackage{needspace}
+\makeatletter
+\newcommand{\TightFigure}[3][0.68\textheight]{%
+  \begingroup
+    \setlength{\intextsep}{0pt}%
+    \setlength{\textfloatsep}{0pt}%
+    \setlength{\abovecaptionskip}{2pt}%
+    \setlength{\belowcaptionskip}{0pt}%
+    \needspace{#1}%
+    \vspace{-0.4\baselineskip}%
+    \begin{figure}[H]\centering
+      \includegraphics[width=\linewidth,height=#1,keepaspectratio]{#2}
+      \caption{#3}
+    \end{figure}%
+  \endgroup
+}
+\makeatother
+
+% Header (not on title page)
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\sffamily Arjeesh Palai\ \ 002310501086}
+\rhead{\sffamily \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% (Kept from template; not used here but handy)
+\usepackage{xcolor}
+\definecolor{lstgray}{gray}{0.95}
+
+% Metadata
+\newcommand{\univ}{Jadavpur University}
+\newcommand{\dept}{Department of Computer Science and Engineering}
+\newcommand{\coursename}{BCSE UG-III}
+\newcommand{\assignmenttitle}{Networks Lab Assignment 6}
+\newcommand{\studentname}{Arjeesh Palai}
+\newcommand{\rollno}{002310501086}
+\newcommand{\group}{A3}
+\newcommand{\submissiondate}{10 / 11 / 2025}
+
+% F1 Turbo (optional)
+\usepackage{ifxetex,ifluatex}
+\newif\ifxetexorluatex
+\ifxetex\xetexorluatextrue\fi
+\ifluatex\xetexorluatextrue\fi
+\ifxetexorluatex
+  \usepackage{fontspec}
+  \newfontfamily\FOneTurbo{F1 Turbo}[BoldFont={F1 Turbo},ItalicFeatures={FakeSlant=0.2}]
+\else
+  \newcommand{\FOneTurbo}{\sffamily\bfseries\itshape}
+\fi
+
+\begin{document}
+
+%========================
+% Title Page (logo ONLY here; title clearly below logo)
+%========================
+\begin{titlepage}
+  \thispagestyle{empty}
+  \sffamily
+  \begin{center}
+    {\FOneTurbo \fontsize{40}{44}\selectfont \univ\par}
+    \vspace{0.3em}
+    {\FOneTurbo \fontsize{30}{34}\selectfont \dept\par}
+
+    \vspace{1.4cm}
+    \includegraphics[width=0.24\linewidth]{ju.png}\par
+
+    \vspace{2.0cm}
+    {\FOneTurbo \fontsize{40}{44}\selectfont \MakeUppercase{\assignmenttitle}\par}
+
+    \vspace{0.9cm}
+    {\FOneTurbo \fontsize{24}{28}\selectfont \coursename\par}
+  \end{center}
+
+  \vspace{1.8cm}
+  \raggedright
+  \noindent\begin{tabular}{@{}p{4cm}l}
+    \textbf{Student}  : & \studentname \\
+    \textbf{Roll No.} : & \rollno \\
+    \textbf{Group}    : & \group \\
+    \textbf{Date}     : & \submissiondate \\
+  \end{tabular}
+
+  \vfill
+  \noindent\rule{\linewidth}{0.8pt}
+\end{titlepage}
+
+\setcounter{page}{1}
+
+%========================
+% Brief
+%========================
+\section*{Assignment 6}
+This report summarizes my Cisco Packet Tracer simulations and validations for all seven tasks (back-to-back link, LANs with hub/switch, interconnection, two routed LANs with static routes, DHCP integration, and a LAN with DHCP--DNS--Web--FTP). Each answer begins with the relevant screenshots placed \emph{before} the text, with minimal spacing.
+
+%========================
+% Q1
+%========================
+\subsection*{Q1. Back-to-Back Connection}
+\begin{figure}[H]\centering
+  \includegraphics[width=.49\linewidth]{q1_1.png}\hfill
+  \includegraphics[width=.49\linewidth]{q1_2.png}
+  \caption{Q1: Direct crossover wiring, addressing, and successful ping.}
+\end{figure}
+I connected two PCs directly with a \textbf{crossover cable}. I set the IPs to \texttt{192.168.1.1} and \texttt{192.168.1.2} (/24). The ping test from one host to the other succeeded, confirming end-to-end connectivity.
+
+%========================
+% Q2
+%========================
+\subsection*{Q2. LAN-A with Hub}
+\begin{figure}[H]\centering
+  \includegraphics[width=.49\linewidth]{q2_1.png}\hfill
+  \includegraphics[width=.49\linewidth]{q2_2.png}
+  \caption{Q2 (topology \& addressing 1/2).}
+\end{figure}
+\begin{figure}[H]\centering
+  \includegraphics[width=.9\linewidth]{q2_3.png}
+  \caption{Q2 (ping matrix 2/2).}
+\end{figure}
+I built \textbf{LAN-A} using a hub and straight-through cables. I assigned \texttt{192.168.10.1}, \texttt{.2}, and \texttt{.3}. Pings between every pair of nodes succeeded, as expected for a shared-collision medium.
+
+%========================
+% Q3
+%========================
+\subsection*{Q3. LAN-B with Switch (Before/After Ping Tables)}
+% before-ping (ARP empty; MAC table empty)
+\begin{figure}[H]\centering
+  \includegraphics[width=.49\linewidth]{q3_1.png}\hfill
+  \includegraphics[width=.49\linewidth]{q3_2.png}
+  \caption{Q3 Before Ping (1/2): Host ARP table empty; switch MAC-table baseline.}
+\end{figure}
+\begin{figure}[H]\centering
+  \includegraphics[width=.9\linewidth]{q3_3.png}
+  \caption{Q3 Before Ping (2/2): No dynamic MAC entries yet.}
+\end{figure}
+
+% after-ping (ARP & MAC learning)
+\begin{figure}[H]\centering
+  \includegraphics[width=.49\linewidth]{q3_4.png}\hfill
+  \includegraphics[width=.49\linewidth]{q3_5.png}
+  \caption{Q3 After Ping (1/2): ARP populated on hosts.}
+\end{figure}
+\begin{figure}[H]\centering
+  \includegraphics[width=.9\linewidth]{q3_6.png}
+  \caption{Q3 After Ping (2/2): Switch learned port--MAC mappings.}
+\end{figure}
+I created \textbf{LAN-B} on \texttt{192.168.20.0/24} using a \textbf{switch}. Before any traffic, both the host ARP tables and the switch's MAC table were empty. After I pinged from one host to another, ARP entries appeared on the hosts and the switch \emph{learned} the source MACs, showing dynamic entries per port.
+
+%========================
+% Q4
+%========================
+\subsection*{Q4. Connecting LAN-A and LAN-B}
+\begin{figure}[H]\centering
+  \includegraphics[width=.49\linewidth]{q4_1.png}\hfill
+  \includegraphics[width=.49\linewidth]{q4_2.png}
+  \caption{Q4 (1/2): Hub--Switch crossover and unified subnet.}
+\end{figure}
+\begin{figure}[H]\centering
+  \includegraphics[width=.9\linewidth]{q4_3.png}
+  \caption{Q4 (2/2): End-to-end pings across both segments.}
+\end{figure}
+I reconfigured all six hosts onto the same subnet \texttt{192.168.10.0/24} (\texttt{.1}--\texttt{.6}) and linked the hub and switch using a \textbf{crossover cable}. Pings across the two segments succeeded. On the switch, MAC entries for the three hub-side PCs appeared behind the \emph{single} uplink port—illustrating that a hub forwards all frames out all ports.
+
+%========================
+% Q5
+%========================
+\subsection*{Q5. Two LANs with Routers (Static Routing)}
+\begin{figure}[H]\centering
+  \includegraphics[width=.49\linewidth]{q5_1.png}\hfill
+  \includegraphics[width=.49\linewidth]{q5_2.png}
+  \caption{Q5: JU-Main (\texttt{192.168.148.0/24}) and JU-SL (\texttt{192.168.149.0/24}) via routed WAN \texttt{192.168.150.0/24}; static routes configured.}
+\end{figure}
+I built two routed LANs:
+\begin{enumerate}[leftmargin=2em,itemsep=0.2em]
+  \item \textbf{JU-Main LAN} on \texttt{192.168.148.0/24} with a 2950 switch and a router (\texttt{Fa0/0 = 192.168.148.1}). Each host's default gateway points to \texttt{148.1}.
+  \item \textbf{JU-SL LAN} on \texttt{192.168.149.0/24} with its own switch and router (\texttt{Fa0/0 = 192.168.149.1}). Hosts use \texttt{149.1} as the gateway.
+  \item I added \texttt{WIC-2T} modules and connected the routers over a serial link on \texttt{192.168.150.0/24}.
+  \item I configured \textbf{static routes} on both routers so that \texttt{148.0/24} and \texttt{149.0/24} could reach each other via the \texttt{150.0/24} WAN.
+\end{enumerate}
+End-to-end pings between JU-Main and JU-SL hosts were successful.
+
+%========================
+% Q6
+%========================
+\subsection*{Q6. Adding DHCP Servers to Each Routed LAN}
+\begin{figure}[H]\centering
+  \includegraphics[width=.49\linewidth]{q6_1.png}\hfill
+  \includegraphics[width=.49\linewidth]{q6_2.png}
+  \caption{Q6: DHCP servers per LAN; PCs switched to DHCP and successfully leased IPs and gateways.}
+\end{figure}
+On the \textbf{same topology} as Q5, I placed one server in each LAN and enabled the DHCP service:
+\begin{itemize}[leftmargin=2em,itemsep=0.2em]
+  \item JU-Main server leases addresses and default gateway for \texttt{192.168.148.0/24}.
+  \item JU-SL server leases addresses and default gateway for \texttt{192.168.149.0/24}.
+\end{itemize}
+I set all six PCs to \emph{DHCP}; each successfully obtained an address and the correct default gateway from its LAN's server.
+
+%========================
+% Q7
+%========================
+\subsection*{Q7. LAN with DHCP, DNS, Web, and FTP (CSE)}
+\begin{figure}[H]\centering
+  \includegraphics[width=.49\linewidth]{q7_1.png}\hfill
+  \includegraphics[width=.49\linewidth]{q7_2.png}
+  \caption{Q7 (1/2): CSE LAN servers and DHCP scope including DNS option.}
+\end{figure}
+\begin{figure}[H]\centering
+  \includegraphics[width=.9\linewidth]{q7_3.png}
+  \caption{Q7 (2/2): Clients resolve and access services via \texttt{cse.myuniv.edu}.}
+\end{figure}
+I built a \textbf{CSE} LAN with one switch, three hosts, and four servers (DHCP, DNS, Web, FTP). I assigned \emph{static} IPs to the servers. On the DHCP server, I included the \textbf{DNS server address} in the scope options so clients automatically learned it. On the DNS server, I created \texttt{A} records for the Web and FTP servers under the domain \texttt{cse.myuniv.edu}. I set all three PCs to obtain IPs via DHCP; they received the expected IP configuration and DNS server. From a PC browser, I successfully opened the website using the domain name \texttt{www.cse.myuniv.edu}.
+
+\end{document}
